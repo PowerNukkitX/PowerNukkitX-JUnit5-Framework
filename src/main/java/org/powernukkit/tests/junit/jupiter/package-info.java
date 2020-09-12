@@ -16,23 +16,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+@ParametersAreNonnullByDefault
 package org.powernukkit.tests.junit.jupiter;
 
-import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockID;
-import cn.nukkit.block.BlockStone;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-/**
- * @author joserobjr
- */
-@ExtendWith(PowerNukkitExtension.class)
-class PowerNukkitExtensionTest {
-    @Test
-    void testStoneClass() {
-        assertEquals(BlockStone.class, Block.get(BlockID.STONE).getClass());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

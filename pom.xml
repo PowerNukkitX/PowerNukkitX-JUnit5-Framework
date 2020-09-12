@@ -82,15 +82,16 @@
     </distributionManagement>
 
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <junit.jupiter.version>5.4.2</junit.jupiter.version>
-        <junit.platform.version>1.1.0</junit.platform.version>
-        <log4j2.version>2.13.3</log4j2.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <jline.version>3.9.0</jline.version>
         <powernukkit.version>1.3.1.5-PN</powernukkit.version>
         <lombok.version>1.18.4</lombok.version>
+
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
+
+        <junit.jupiter.version>5.4.2</junit.jupiter.version>
+        <junit.platform.version>1.1.0</junit.platform.version>
+        <mokito.version>3.3.3</mokito.version>
     </properties>
     
     <dependencies>
@@ -111,6 +112,12 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>${mokito.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
     

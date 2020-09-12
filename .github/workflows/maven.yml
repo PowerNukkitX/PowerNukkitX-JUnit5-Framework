@@ -1,4 +1,4 @@
-name: PowerNukkit v1.X
+name: Build and Test
 
 on: [push,pull_request]
 

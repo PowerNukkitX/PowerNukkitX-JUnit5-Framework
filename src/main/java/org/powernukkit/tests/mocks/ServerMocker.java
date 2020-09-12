@@ -36,24 +36,31 @@ import cn.nukkit.permission.BanList;
 import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.plugin.service.NKServiceManager;
 import cn.nukkit.resourcepacks.ResourcePackManager;
-import cn.nukkit.utils.*;
+import cn.nukkit.scheduler.ServerScheduler;
+import cn.nukkit.utils.Config;
+import cn.nukkit.utils.PlayerDataSerializer;
+import cn.nukkit.utils.Watchdog;
 import com.google.common.io.Files;
 import lombok.SneakyThrows;
 import org.apiguardian.api.API;
 import org.iq80.leveldb.DB;
-import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.configuration.injection.scanner.MockScanner;
 import org.mockito.internal.util.collections.Sets;
+import org.powernukkit.tests.api.MockServer;
+import org.powernukkit.tests.junit.jupiter.PowerNukkitExtension;
 
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.mockito.Mockito.*;
 import static org.powernukkit.tests.api.ReflectionUtil.*;
 
 /**
@@ -64,7 +71,9 @@ public class ServerMocker implements Mocker<Server> {
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public static void setServerInstance(Server server) {
         execute(()-> setField(null, Server.class.getDeclaredField("instance"), server));
-    } 
+    }
+    
+    private MockServer config;
     
     @Mock
     PluginManager pluginManager;
@@ -102,6 +111,9 @@ public class ServerMocker implements Mocker<Server> {
     @Mock
     QueryHandler queryHandler;
     
+    @Mock
+    ServerScheduler serverScheduler;
+    
     File tempDir;
     File worldsDir;
     File playersDir;
@@ -110,10 +122,19 @@ public class ServerMocker implements Mocker<Server> {
     File bannedPlayersFile;
     File bannedIpsFile;
     
-    @Mock(answer = Answers.CALLS_REAL_METHODS)
     Server server;
     
     BaseLang baseLang = new BaseLang(BaseLang.FALLBACK_LANGUAGE);
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public ServerMocker() {
+        this(PowerNukkitExtension.class.getAnnotation(MockServer.class));
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public ServerMocker(MockServer config) {
+        this.config = config;
+    }
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public void setActive() {
@@ -126,14 +147,42 @@ public class ServerMocker implements Mocker<Server> {
     @Override
     public Server create() {
         MockitoAnnotations.initMocks(this);
+        
+        server = config.callsRealMethods()? mock(Server.class, CALLS_REAL_METHODS) : mock(Server.class);
+        
+        if (config.initPrivateFields() || config.createTempDir()) {
+            tempDir = config.createTempDir()? Files.createTempDir() : new File(".");
+            worldsDir = new File(tempDir, "worlds");
+            playersDir = new File(tempDir, "players");
+            pluginsDir = new File(tempDir, "plugins");
+            resourcePacksDir = new File(tempDir, "resource_packs");
+            bannedPlayersFile = new File(tempDir, "banned-players.json");
+            bannedIpsFile = new File(tempDir, "banned-ips.json");
+        }
+        
+        if (!config.callsRealMethods()) {
+            lenient().when(server.getConfig(anyString(), any())).thenAnswer(call-> call.getArgument(2));
+            lenient().when(server.getPluginManager()).thenReturn(pluginManager);
+            lenient().when(server.getPlayerDataSerializer()).thenReturn(playerDataSerializer);
+            lenient().when(server.getConsoleSender()).thenReturn(new ConsoleCommandSender());
+            lenient().when(server.getNetwork()).thenReturn(network);
+            lenient().when(server.getEntityMetadata()).thenReturn(entityMetadata);
+            lenient().when(server.getPlayerMetadata()).thenReturn(playerMetadata);
+            lenient().when(server.getPlayerDataSerializer()).thenReturn(playerDataSerializer);
+            lenient().when(server.getLevelMetadata()).thenReturn(levelMetadata);
+            lenient().when(server.getQueryInformation()).thenReturn(queryRegenerateEvent);
+            
+            if (config.createTempDir()) {
+                String path = tempDir.getAbsolutePath() + "/";
+                lenient().when(server.getDataPath()).thenReturn(path);
+                lenient().when(server.getFilePath()).thenReturn(path);
+                lenient().when(server.getPluginPath()).thenReturn(pluginsDir.getAbsolutePath()+"/");
+            }
+        }
 
-        tempDir = Files.createTempDir();
-        worldsDir = new File(tempDir, "worlds");
-        playersDir = new File(tempDir, "players");
-        pluginsDir = new File(tempDir, "plugins");
-        resourcePacksDir = new File(tempDir, "resource_packs");
-        bannedPlayersFile = new File(tempDir, "banned-players.json");
-        bannedIpsFile = new File(tempDir, "banned-ips.json");
+        if (!config.initPrivateFields()) {
+            return server;
+        }
         
         Set<Object> mocks = Sets.newMockSafeHashSet();
         new MockScanner(this, ServerMocker.class).addPreparedMocks(mocks);

@@ -16,48 +16,35 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.powernukkit.tests.api;
+package org.powernukkit.tests.mocks;
 
-import cn.nukkit.plugin.Plugin;
+import cn.nukkit.entity.Entity;
 import org.apiguardian.api.API;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.powernukkit.tests.api.MockEntity;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 
 /**
  * @author joserobjr
  */
-@Target(TYPE)
-@Retention(RUNTIME)
-@Documented
 @API(status = EXPERIMENTAL, since = "0.1.0")
-public @interface MockServer {
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    String name() default "TestServer";
+public class EntityMocker implements Mocker<Entity> {
+    @Mock
+    Entity entity;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    int maxPlayers() default 20;
+    public EntityMocker() {
+    }
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    MockLevel[] levels() default {};
+    public EntityMocker(MockEntity config) {
+    }
 
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    MockPlayer[] players() default {};
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    Class<? extends Plugin>[] plugins() default {};
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    boolean initPrivateFields() default true;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    boolean callsRealMethods() default true;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    boolean createTempDir() default true;
+    @Override
+    public Entity create() {
+        MockitoAnnotations.initMocks(this);
+        return entity;
+    }
 }

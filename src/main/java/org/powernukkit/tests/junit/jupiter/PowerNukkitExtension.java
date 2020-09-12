@@ -18,18 +18,19 @@
 
 package org.powernukkit.tests.junit.jupiter;
 
+import cn.nukkit.Player;
 import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.dispenser.DispenseBehaviorRegister;
 import cn.nukkit.entity.Attribute;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.GlobalBlockPalette;
+import cn.nukkit.level.Level;
 import cn.nukkit.level.biome.EnumBiome;
 import cn.nukkit.level.format.LevelProviderManager;
 import cn.nukkit.level.format.anvil.Anvil;
-import cn.nukkit.level.format.leveldb.LevelDB;
-import cn.nukkit.level.format.mcregion.McRegion;
 import cn.nukkit.level.generator.Flat;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.Nether;
@@ -40,25 +41,46 @@ import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.powernukkit.tests.api.MockEntity;
+import org.powernukkit.tests.api.MockLevel;
+import org.powernukkit.tests.api.MockPlayer;
+import org.powernukkit.tests.api.MockServer;
+import org.powernukkit.tests.mocks.EntityMocker;
+import org.powernukkit.tests.mocks.LevelMocker;
+import org.powernukkit.tests.mocks.PlayerMocker;
 import org.powernukkit.tests.mocks.ServerMocker;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.powernukkit.tests.api.ReflectionUtil.execute;
+import static org.powernukkit.tests.api.ReflectionUtil.setField;
 
 /**
  * @author joserobjr
  */
 @API(since = "0.1.0", status = EXPERIMENTAL)
+@MockServer(name = "TinyTestServer", initPrivateFields = false, callsRealMethods = false, createTempDir = false)
 public class PowerNukkitExtension extends MockitoExtension implements TestInstancePostProcessor {
     @Override
     public void postProcessTestInstance(Object testInstance, ExtensionContext context) {
-        ServerMocker serverMocker = new ServerMocker();
+        MockServer config = testInstance.getClass().getAnnotation(MockServer.class);
+        ServerMocker serverMocker = config != null? new ServerMocker(config) : new ServerMocker();
         Server server = serverMocker.create();
         serverMocker.setActive();
         
         initStatics(server);
+
+        for (Field field : testInstance.getClass().getFields()) {
+            if (field.isAnnotationPresent(MockPlayer.class) && field.getType().isAssignableFrom(Player.class)) {
+                setField(testInstance, field, new PlayerMocker(field.getAnnotation(MockPlayer.class)).create());
+            } else if (field.isAnnotationPresent(MockEntity.class) && field.getType().isAssignableFrom(Entity.class)) {
+                setField(testInstance, field, new EntityMocker(field.getAnnotation(MockEntity.class)).create());
+            } else if (field.isAnnotationPresent(MockLevel.class) && field.getType().isAssignableFrom(Level.class)) {
+                setField(testInstance, field, new LevelMocker(field.getAnnotation(MockLevel.class)).create());
+            }
+        }
     }
     
     private void initStatics(Server server) {
@@ -83,8 +105,6 @@ public class PowerNukkitExtension extends MockitoExtension implements TestInstan
         GlobalBlockPalette.getOrCreateRuntimeId(0, 0); //Force it to load
 
         LevelProviderManager.addProvider(null, Anvil.class);
-        LevelProviderManager.addProvider(null, McRegion.class);
-        LevelProviderManager.addProvider(null, LevelDB.class);
 
         Generator.addGenerator(Flat.class, "flat", Generator.TYPE_FLAT);
         Generator.addGenerator(Normal.class, "normal", Generator.TYPE_INFINITE);

@@ -18,46 +18,18 @@
 
 package org.powernukkit.tests.api;
 
-import cn.nukkit.plugin.Plugin;
 import org.apiguardian.api.API;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 
 /**
  * @author joserobjr
  */
-@Target(TYPE)
-@Retention(RUNTIME)
-@Documented
 @API(status = EXPERIMENTAL, since = "0.1.0")
-public @interface MockServer {
+public @interface ItemEnchantment {
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    String name() default "TestServer";
+    int id();
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    int maxPlayers() default 20;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    MockLevel[] levels() default {};
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    MockPlayer[] players() default {};
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    Class<? extends Plugin>[] plugins() default {};
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    boolean initPrivateFields() default true;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    boolean callsRealMethods() default true;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    boolean createTempDir() default true;
+    int level() default 1;
 }

@@ -16,36 +16,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.powernukkit.tests.api;
+package org.powernukkit.tests.mocks;
 
-import cn.nukkit.level.Level;
+import cn.nukkit.Player;
 import org.apiguardian.api.API;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.powernukkit.tests.api.MockPlayer;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 
 /**
  * @author joserobjr
  */
-@Target(FIELD)
-@Retention(RUNTIME)
-@Documented
-@API(status = EXPERIMENTAL, since = "0.1.0")
-public @interface MockLevel {
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    String name() default "";
+public class PlayerMocker implements Mocker<Player> {
+    @Mock
+    Player player;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    int dimension() default Level.DIMENSION_OVERWORLD;
+    public PlayerMocker() {
+    }
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    String generator() default "flat";
+    public PlayerMocker(MockPlayer config) {
+    }
 
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    int[] spawn() default {0, 64, 0};
+    @Override
+    public Player create() {
+        MockitoAnnotations.initMocks(this);
+        return player;
+    }
 }

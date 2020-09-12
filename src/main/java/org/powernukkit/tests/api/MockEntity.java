@@ -18,6 +18,7 @@
 
 package org.powernukkit.tests.api;
 
+import cn.nukkit.entity.Entity;
 import org.apiguardian.api.API;
 
 import java.lang.annotation.Documented;
@@ -35,21 +36,15 @@ import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 @Retention(RUNTIME)
 @Documented
 @API(status = EXPERIMENTAL, since = "0.1.0")
-public @interface MockPlayer {
+public @interface MockEntity {
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    String name() default "";
+    Class<? extends Entity> type() default Entity.class;
 
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    float health() default 20;
+    
     @API(status = EXPERIMENTAL, since = "0.1.0")
     String level() default "";
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    int protocol() default 0;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    long clientId() default 0L;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    long[] clientUUID() default {};
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     double[] position() default {};
@@ -59,9 +54,6 @@ public @interface MockPlayer {
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     float pitch() default 0;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    float health() default 20;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     ItemStack[] inventory() default {};
@@ -74,7 +66,4 @@ public @interface MockPlayer {
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     ItemStack[] equipments() default {};
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    ItemStack[] enderchest() default {};
 }

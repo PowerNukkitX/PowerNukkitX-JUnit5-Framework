@@ -20,61 +20,37 @@ package org.powernukkit.tests.api;
 
 import org.apiguardian.api.API;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 
 /**
  * @author joserobjr
  */
-@Target(FIELD)
-@Retention(RUNTIME)
-@Documented
 @API(status = EXPERIMENTAL, since = "0.1.0")
-public @interface MockPlayer {
+public @interface ItemStack {
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    String name() default "";
+    int item() default 0;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    String level() default "";
+    int block() default 0;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    int protocol() default 0;
+    int meta() default 0;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    long clientId() default 0L;
+    int amount() default 1;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    long[] clientUUID() default {};
+    String displayName() default "~~~";
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    double[] position() default {};
+    String[] lore() default {};
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    float yaw() default 0;
+    boolean unbreakable() default false;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    float pitch() default 0;
+    ItemEnchantment[] enchantments() default {};
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    float health() default 20;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    ItemStack[] inventory() default {};
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    ItemStack mainHand() default @ItemStack;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    ItemStack offhand() default @ItemStack;
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    ItemStack[] equipments() default {};
-
-    @API(status = EXPERIMENTAL, since = "0.1.0")
-    ItemStack[] enderchest() default {};
+    String namedTags() default "";
 }

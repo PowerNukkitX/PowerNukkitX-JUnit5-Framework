@@ -60,3 +60,7 @@ class MyAwesomeTest {
     }
 }
 ```
+
+## Java Documentation
+The javadoc files can be viewed online at:  
+https://powernukkit.github.io/PowerNukkit-JUnit5-Framework/javadoc/0.1.0-SNAPSHOT

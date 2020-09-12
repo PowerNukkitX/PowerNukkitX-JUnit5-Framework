@@ -39,13 +39,13 @@ import cn.nukkit.potion.Potion;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
-import org.mockito.internal.util.reflection.FieldSetter;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.powernukkit.tests.mocks.ServerMocker;
 
 import java.lang.reflect.Method;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.powernukkit.tests.api.ReflectionUtil.execute;
 
 /**
  * @author joserobjr
@@ -53,19 +53,24 @@ import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 @API(since = "0.1.0", status = EXPERIMENTAL)
 public class PowerNukkitExtension extends MockitoExtension implements TestInstancePostProcessor {
     @Override
-    public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {
+    public void postProcessTestInstance(Object testInstance, ExtensionContext context) {
         ServerMocker serverMocker = new ServerMocker();
         Server server = serverMocker.create();
+        serverMocker.setActive();
         
-        FieldSetter.setField(null, Server.class.getDeclaredField("instance"), server);
-
-        Method method = Server.class.getDeclaredMethod("registerEntities");
-        method.setAccessible(true);
-        method.invoke(server);
-
-        method = Server.class.getDeclaredMethod("registerBlockEntities");
-        method.setAccessible(true);
-        method.invoke(server);
+        initStatics(server);
+    }
+    
+    private void initStatics(Server server) {
+        execute(()-> {
+            Method method = Server.class.getDeclaredMethod("registerEntities");
+            method.setAccessible(true);
+            method.invoke(server);
+            
+            method = Server.class.getDeclaredMethod("registerBlockEntities");
+            method.setAccessible(true);
+            method.invoke(server);
+        });
 
         Block.init();
         Enchantment.init();

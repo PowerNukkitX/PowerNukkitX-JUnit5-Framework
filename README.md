@@ -44,8 +44,19 @@ dependencies {
 
 ## Example Usage
 ```java
+import cn.nukkit.block.Block;
+import cn.nukkit.block.BlockID;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.powernukkit.tests.junit.jupiter.PowerNukkitExtension;
 
+import static org.junit.jupiter.api.Assertions.*;
+
+@ExtendWith(PowerNukkitExtension.class)
 class MyAwesomeTest {
-
+    @Test
+    void testStoneClass() {
+        assertEquals(BlockStone.class, Block.get(BlockID.STONE).getClass());
+    }
 }
 ```

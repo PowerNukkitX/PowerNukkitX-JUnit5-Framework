@@ -158,7 +158,11 @@ public class PowerNukkitExtension extends MockitoExtension implements TestInstan
 
     @Override
     public void afterEach(ExtensionContext context) {
-        context.getStore(POWERNUKKIT).get(SESSION, Session.class).releaseResources();
+        try {
+            context.getStore(POWERNUKKIT).get(SESSION, Session.class).releaseResources();
+        } finally {
+            super.afterEach(context);
+        }
     }
 
     @Override

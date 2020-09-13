@@ -163,6 +163,8 @@ public class ServerMocker extends Mocker<Server> {
             bannedIpsFile = new File(tempDir, "banned-ips.json");
         }
         
+        setField(server, Server.class.getDeclaredField("isRunning"), new AtomicBoolean(true));
+        
         if (!config.callsRealMethods()) {
             BanList nameBans = mock(BanList.class);
             BanList ipBans = mock(BanList.class);
@@ -191,6 +193,7 @@ public class ServerMocker extends Mocker<Server> {
             lenient().when(server.getOfflinePlayerData(any(UUID.class), anyBoolean())).thenCallRealMethod();
             lenient().when(server.getResourcePackManager()).thenReturn(mock(ResourcePackManager.class));
             lenient().when(server.getCommandMap()).thenReturn(mock(SimpleCommandMap.class));
+            lenient().when(server.isRunning()).thenReturn(true);
             
             if (config.createTempDir()) {
                 String path = tempDir.getAbsolutePath() + "/";
@@ -255,7 +258,6 @@ public class ServerMocker extends Mocker<Server> {
         setField(server, Server.class.getDeclaredField("config"), nukkitYml);
         setField(server, Server.class.getDeclaredField("operators"), new Config());
         setField(server, Server.class.getDeclaredField("whitelist"), new Config());
-        setField(server, Server.class.getDeclaredField("isRunning"), new AtomicBoolean(true));
         setField(server, Server.class.getDeclaredField("ignoredPackets"), new HashSet<>());
         setField(server, Server.class.getDeclaredField("profilingTickrate"), 20);
         setField(server, Server.class.getDeclaredField("tickAverage"), new float[]{20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20, 20});

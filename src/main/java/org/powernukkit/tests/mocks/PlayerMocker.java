@@ -19,31 +19,150 @@
 package org.powernukkit.tests.mocks;
 
 import cn.nukkit.Player;
+import cn.nukkit.Server;
+import cn.nukkit.entity.data.Skin;
+import cn.nukkit.level.Level;
+import cn.nukkit.level.Position;
+import cn.nukkit.level.format.LevelProvider;
+import cn.nukkit.level.format.generic.BaseFullChunk;
+import cn.nukkit.math.Vector3;
+import cn.nukkit.network.SourceInterface;
+import cn.nukkit.network.protocol.LoginPacket;
+import cn.nukkit.network.protocol.ProtocolInfo;
 import org.apiguardian.api.API;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.powernukkit.tests.api.MockPlayer;
+import org.powernukkit.tests.junit.jupiter.PowerNukkitExtension;
+
+import java.awt.image.BufferedImage;
+import java.lang.reflect.Method;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
+import static org.powernukkit.tests.api.ReflectionUtil.*;
 
 /**
  * @author joserobjr
  */
-public class PlayerMocker implements Mocker<Player> {
-    @Mock
+public class PlayerMocker extends Mocker<Player> {
+    final Function<String, Level> levelSupplier;
+    final MockPlayer config;
+    
     Player player;
 
+    String playerName;
+
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    public PlayerMocker() {
+    public PlayerMocker(Function<String, Level> levelSupplier) {
+        this(levelSupplier, supply(()-> PowerNukkitExtension.class.getDeclaredField("defaults").getAnnotation(MockPlayer.class)));
     }
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    public PlayerMocker(MockPlayer config) {
+    public PlayerMocker(Function<String, Level> levelSupplier, MockPlayer config) {
+        this.config = config;
+        this.levelSupplier = levelSupplier;
     }
 
     @Override
     public Player create() {
-        MockitoAnnotations.initMocks(this);
+        Level level = levelSupplier.apply(config.level());
+        Vector3 pos = AnnotationParser.parseVector3(config.position());
+        int chunkX = pos.getChunkX();
+        int chunkZ = pos.getChunkZ();
+        BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
+        if (chunk == null) {
+            chunk = mock(BaseFullChunk.class);
+            LevelProvider provider = mock(LevelProvider.class);
+            lenient().when(provider.getChunk(eq(chunkX), eq(chunkZ))).thenReturn(chunk);
+            lenient().when(provider.getLevel()).thenReturn(level);
+            
+            lenient().doCallRealMethod().when(chunk).setPosition(anyInt(), anyInt());
+            chunk.setPosition(chunkX, chunkZ);
+            lenient().when(chunk.getProvider()).thenReturn(provider);
+        }
+
+        /// Setup skin ///
+        Skin skin = new Skin();
+        skin.setSkinId("TestSkin"+ThreadLocalRandom.current().nextDouble());
+        skin.setSkinData(new BufferedImage(64, 32, BufferedImage.TYPE_INT_BGR));
+        assertTrue(skin.isValid());
+
+        /// Make player login ///
+        SourceInterface sourceInterface = mock(SourceInterface.class);
+        long clientId = config.clientId();
+        if (clientId == 0) {
+            clientId = ThreadLocalRandom.current().nextLong();
+        }
+
+        String clientIp = config.clientIp();
+        if (clientIp.isEmpty()) {
+            ThreadLocalRandom random = ThreadLocalRandom.current();
+            clientIp = random.nextInt(1, 255)+"."
+                    +random.nextInt(1, 255)+"."
+                    +random.nextInt(1, 255)+"."
+                    +random.nextInt(1, 255);
+        }
+        
+        int clientPort = config.clientPort();
+        if (clientPort == 0) {
+            clientPort = ThreadLocalRandom.current().nextInt(1, 0xFFFF);
+        }
+
+        player = mock(Player.class, withSettings().defaultAnswer(CALLS_REAL_METHODS)
+                .useConstructor(sourceInterface, clientId, clientIp, clientPort));
+        
+        String name = config.name();
+        if (name.isEmpty()) {
+            name = "TestPlayer"+ThreadLocalRandom.current().nextDouble();
+        }
+        playerName = name;
+        
+        LoginPacket loginPacket = new LoginPacket();
+        loginPacket.username = name;
+        loginPacket.protocol = ProtocolInfo.CURRENT_PROTOCOL;
+        loginPacket.clientId = clientId;
+        loginPacket.clientUUID = config.clientUUID().length == 2? new UUID(config.clientUUID()[0], config.clientUUID()[1]) : UUID.randomUUID();
+        loginPacket.skin = skin;
+        loginPacket.putLInt(2);
+        loginPacket.put("{}".getBytes());
+        loginPacket.putLInt(0);
+        execute(()-> setField(Server.getInstance(), Server.class.getDeclaredField("defaultLevel"), level));
+        doCallRealMethod().when(Server.getInstance()).getDefaultLevel();
+        doReturn(new Position(pos.x, pos.y, pos.z, level)).when(level).getSafeSpawn();
+        player.handleDataPacket(loginPacket);
+        execute(()-> {
+            Method method = Player.class.getDeclaredMethod("completeLoginSequence");
+            method.setAccessible(true);
+            method.invoke(player);
+        });
+
+        assertTrue(player.isOnline(), "Failed to make the fake player login");
+
+        execute(()-> {
+            Method method = Player.class.getDeclaredMethod("doFirstSpawn");
+            method.setAccessible(true);
+            method.invoke(player);
+        });
+        
+        player.yaw = config.yaw();
+        player.pitch = config.pitch();
+        player.setHealth(config.health());
+        player.noDamageTicks = 0;
+        
         return player;
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public Player getPlayer() {
+        return player;
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public String getPlayerName() {
+        return playerName;
     }
 }

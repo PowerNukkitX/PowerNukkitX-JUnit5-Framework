@@ -44,6 +44,7 @@ import com.google.common.io.Files;
 import lombok.SneakyThrows;
 import org.apiguardian.api.API;
 import org.iq80.leveldb.DB;
+import org.iq80.leveldb.util.FileUtils;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.configuration.injection.scanner.MockScanner;
@@ -51,12 +52,14 @@ import org.mockito.internal.util.collections.Sets;
 import org.powernukkit.tests.api.MockServer;
 import org.powernukkit.tests.junit.jupiter.PowerNukkitExtension;
 
+import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
@@ -67,9 +70,9 @@ import static org.powernukkit.tests.api.ReflectionUtil.*;
  * @author joserobjr
  */
 @API(status = EXPERIMENTAL, since = "0.1.0")
-public class ServerMocker implements Mocker<Server> {
+public class ServerMocker extends Mocker<Server> {
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    public static void setServerInstance(Server server) {
+    public static void setServerInstance(@Nullable Server server) {
         execute(()-> setField(null, Server.class.getDeclaredField("instance"), server));
     }
     
@@ -161,9 +164,16 @@ public class ServerMocker implements Mocker<Server> {
         }
         
         if (!config.callsRealMethods()) {
-            lenient().when(server.getConfig(anyString(), any())).thenAnswer(call-> call.getArgument(2));
+            BanList nameBans = mock(BanList.class);
+            BanList ipBans = mock(BanList.class);
+
+            setField(server, Server.class.getDeclaredField("playerDataSerializer"), playerDataSerializer);
+            setField(server, Server.class.getDeclaredField("pluginManager"), pluginManager);
+            
+            lenient().when(server.getConfig(anyString(), any())).thenAnswer(call-> call.getArgument(1));
+            lenient().when(server.getConfig()).thenReturn(new Config());
             lenient().when(server.getPluginManager()).thenReturn(pluginManager);
-            lenient().when(server.getPlayerDataSerializer()).thenReturn(playerDataSerializer);
+            lenient().when(server.getPlayerDataSerializer()).thenCallRealMethod();
             lenient().when(server.getConsoleSender()).thenReturn(new ConsoleCommandSender());
             lenient().when(server.getNetwork()).thenReturn(network);
             lenient().when(server.getEntityMetadata()).thenReturn(entityMetadata);
@@ -171,6 +181,16 @@ public class ServerMocker implements Mocker<Server> {
             lenient().when(server.getPlayerDataSerializer()).thenReturn(playerDataSerializer);
             lenient().when(server.getLevelMetadata()).thenReturn(levelMetadata);
             lenient().when(server.getQueryInformation()).thenReturn(queryRegenerateEvent);
+            lenient().when(server.getMaxPlayers()).thenReturn(config.maxPlayers());
+            lenient().when(server.getLogger()).thenCallRealMethod();
+            lenient().when(server.getScheduler()).thenReturn(serverScheduler);
+            lenient().when(server.getNameBans()).thenReturn(nameBans);
+            lenient().when(server.getIPBans()).thenReturn(ipBans);
+            lenient().when(server.getLanguage()).thenReturn(new BaseLang(BaseLang.FALLBACK_LANGUAGE));
+            lenient().when(server.isWhitelisted(any())).thenReturn(true);
+            lenient().when(server.getOfflinePlayerData(any(UUID.class), anyBoolean())).thenCallRealMethod();
+            lenient().when(server.getResourcePackManager()).thenReturn(mock(ResourcePackManager.class));
+            lenient().when(server.getCommandMap()).thenReturn(mock(SimpleCommandMap.class));
             
             if (config.createTempDir()) {
                 String path = tempDir.getAbsolutePath() + "/";
@@ -205,7 +225,7 @@ public class ServerMocker implements Mocker<Server> {
         serverProperties.set("achievements", true);
         serverProperties.set("announce-player-achievements", true);
         serverProperties.set("spawn-protection", 16);
-        serverProperties.set("max-players", 20);
+        serverProperties.set("max-players", config.maxPlayers());
         serverProperties.set("allow-flight", false);
         serverProperties.set("spawn-animals", true);
         serverProperties.set("spawn-mobs", true);
@@ -294,5 +314,16 @@ public class ServerMocker implements Mocker<Server> {
 
         setField(null, instance, before);
         return this.server;
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public Server getServer() {
+        return server;
+    }
+
+    public void releaseResources() {
+        if (tempDir != null) {
+            FileUtils.deleteRecursively(tempDir);
+        }
     }
 }

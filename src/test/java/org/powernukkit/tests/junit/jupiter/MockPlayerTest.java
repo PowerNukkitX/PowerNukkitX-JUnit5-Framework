@@ -18,22 +18,39 @@
 
 package org.powernukkit.tests.junit.jupiter;
 
-import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockID;
-import cn.nukkit.block.BlockStone;
+import cn.nukkit.Player;
+import cn.nukkit.event.entity.EntityDamageByEntityEvent;
+import cn.nukkit.event.entity.EntityDamageEvent;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.powernukkit.tests.api.MockPlayer;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * @author joserobjr
- */
 @ExtendWith(PowerNukkitExtension.class)
-class PowerNukkitExtensionTest {
-    @Test
-    void testStoneClass() {
-        assertEquals(BlockStone.class, Block.get(BlockID.STONE).getClass());
-    }
+class MockPlayerTest {
+    @MockPlayer(name = "Hello")
+    Player playerHello;
+
+    @MockPlayer(name = "How")
+    Player playerHow;
+
+    @MockPlayer(name = "Are")
+    Player playerAre;
+
+    @MockPlayer(name = "You")
+    Player playerYou;
     
+    @Test
+    void playerTest() {
+        assertEquals("Hello", playerHello.getName());
+        assertNotNull(playerHello.getLevel());
+        
+        assertEquals(playerHello.getLevel(), playerHow.getLevel());
+
+        assertEquals("Are", playerAre.getName());
+        
+        assertTrue(playerYou.attack(new EntityDamageByEntityEvent(playerAre, playerYou, EntityDamageEvent.DamageCause.ENTITY_ATTACK, 10)));
+        assertEquals(10, playerYou.getHealth());
+    }
 }

@@ -19,6 +19,9 @@
 package org.powernukkit.tests.mocks;
 
 import org.apiguardian.api.API;
+import org.powernukkit.tests.api.ReflectionUtil;
+
+import java.lang.reflect.Field;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 
@@ -29,7 +32,48 @@ import static org.apiguardian.api.API.Status.EXPERIMENTAL;
  * @author joserobjr
  */
 @API(status = EXPERIMENTAL, since = "0.1.0")
-public interface Mocker<T> {
+public abstract class Mocker<T> {
+    private Field instanceField;
+
+    private Object instance;
+    
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    T create() throws ReflectiveOperationException;
+    public abstract T create() throws ReflectiveOperationException;
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public final void createAndSet(Object instance, Field field) throws ReflectiveOperationException {
+        setInstance(instance);
+        setInstanceField(field);
+        T mock = create();
+        ReflectionUtil.setField(instance, field, mock);
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public void recreate() throws ReflectiveOperationException {
+        T mock = create();
+        Field field = getInstanceField();
+        if (field != null) {
+            ReflectionUtil.setField(getInstance(), field, mock);
+        }
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public Field getInstanceField() {
+        return instanceField;
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public Object getInstance() {
+        return instance;
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public void setInstance(Object instance) {
+        this.instance = instance;
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public void setInstanceField(Field instanceField) {
+        this.instanceField = instanceField;
+    }
 }

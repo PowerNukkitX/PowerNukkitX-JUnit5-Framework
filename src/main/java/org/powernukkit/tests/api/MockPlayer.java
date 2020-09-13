@@ -43,10 +43,13 @@ public @interface MockPlayer {
     String level() default "";
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    int protocol() default 0;
+    long clientId() default 0L;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    long clientId() default 0L;
+    String clientIp() default "";
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    int clientPort() default 0;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     long[] clientUUID() default {};

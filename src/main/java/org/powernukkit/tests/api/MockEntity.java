@@ -41,9 +41,6 @@ public @interface MockEntity {
     Class<? extends Entity> type() default Entity.class;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
-    float health() default 20;
-    
-    @API(status = EXPERIMENTAL, since = "0.1.0")
     String level() default "";
 
     @API(status = EXPERIMENTAL, since = "0.1.0")

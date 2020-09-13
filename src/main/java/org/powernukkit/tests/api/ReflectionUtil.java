@@ -47,7 +47,7 @@ public class ReflectionUtil {
     }
 
     @API(since = "0.1.0", status = EXPERIMENTAL)
-    public static void setField(@Nullable Object instance, Field field, Object value) {
+    public static void setField(@Nullable Object instance, Field field, @Nullable Object value) {
         execute(()-> {
             field.setAccessible(true);
             field.set(instance, value);
@@ -55,7 +55,7 @@ public class ReflectionUtil {
     }
 
     @API(since = "0.1.0", status = EXPERIMENTAL)
-    public static void setField(Object instance, String name, Object value) {
+    public static void setField(Object instance, String name, @Nullable Object value) {
         execute(()-> setField(instance, instance.getClass().getField(name), value));
     }
 

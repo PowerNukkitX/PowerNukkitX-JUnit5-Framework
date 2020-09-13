@@ -16,24 +16,27 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package org.powernukkit.tests.junit.jupiter;
+package org.powernukkit.tests.mocks;
 
-import cn.nukkit.block.Block;
-import cn.nukkit.block.BlockID;
-import cn.nukkit.block.BlockStone;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
+import cn.nukkit.math.Vector3;
+import org.apiguardian.api.API;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.apiguardian.api.API.Status.INTERNAL;
 
 /**
  * @author joserobjr
  */
-@ExtendWith(PowerNukkitExtension.class)
-class PowerNukkitExtensionTest {
-    @Test
-    void testStoneClass() {
-        assertEquals(BlockStone.class, Block.get(BlockID.STONE).getClass());
+@API(status = INTERNAL, since = "0.1.0")
+public class AnnotationParser {
+    private AnnotationParser() { throw new UnsupportedOperationException(); }
+
+    @API(status = INTERNAL, since = "0.1.0")
+    public static Vector3 parseVector3(double[] pos) {
+        int index = 0;
+        return new Vector3(
+                pos.length > index? pos[index++] : 0, 
+                pos.length > index? pos[index++] : 0, 
+                pos.length > index? pos[index] : 0
+        );
     }
-    
 }

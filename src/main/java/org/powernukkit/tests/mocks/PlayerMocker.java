@@ -40,6 +40,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -72,7 +73,7 @@ public class PlayerMocker extends Mocker<Player> {
         level = levelSupplier.apply(config.level());
         String name = config.name();
         if (name.isEmpty()) {
-            name = "TestPlayer"+ThreadLocalRandom.current().nextLong();
+            name = "TestPlayer"+ThreadLocalRandom.current().nextInt(0, 999999);
             if (name.length() > 16) {
                 name = name.substring(0, 16);
             }
@@ -140,6 +141,7 @@ public class PlayerMocker extends Mocker<Player> {
         doCallRealMethod().when(Server.getInstance()).getDefaultLevel();
         doReturn(new Position(pos.x, pos.y, pos.z, level)).when(level).getSafeSpawn();
         player.handleDataPacket(loginPacket);
+        assertNotNull(player.namedTag, ()-> "Failed to initialize the player mock for "+getPlayerName());
         execute(()-> {
             Method method = Player.class.getDeclaredMethod("completeLoginSequence");
             method.setAccessible(true);

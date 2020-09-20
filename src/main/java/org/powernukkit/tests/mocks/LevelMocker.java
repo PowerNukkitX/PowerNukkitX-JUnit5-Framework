@@ -87,4 +87,9 @@ public class LevelMocker extends Mocker<Level> {
     public Level getLevel() {
         return level;
     }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public MockLevel getConfig() {
+        return config;
+    }
 }

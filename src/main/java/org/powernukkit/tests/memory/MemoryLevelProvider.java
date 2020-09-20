@@ -22,7 +22,9 @@ import cn.nukkit.blockentity.BlockEntity;
 import cn.nukkit.blockentity.BlockEntitySpawnable;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.format.FullChunk;
+import cn.nukkit.level.format.anvil.Anvil;
 import cn.nukkit.level.format.anvil.Chunk;
+import cn.nukkit.level.format.anvil.ChunkSection;
 import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.level.format.generic.BaseLevelProvider;
 import cn.nukkit.level.generator.Flat;
@@ -65,6 +67,11 @@ public class MemoryLevelProvider extends BaseLevelProvider {
     
     private final Long2ObjectMap<BaseFullChunk> savedChunks = new Long2ObjectLinkedOpenHashMap<>();
     private final Long2ObjectMap<BaseFullChunk> loadedChunks = new Long2ObjectLinkedOpenHashMap<>();
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public static ChunkSection createChunkSection(int y) {
+        return Anvil.createChunkSection(y);
+    }
     
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public MemoryLevelProvider(Level level, String pathString) throws IOException {

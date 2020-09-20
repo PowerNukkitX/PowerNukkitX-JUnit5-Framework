@@ -51,9 +51,9 @@ import static org.powernukkit.tests.api.ReflectionUtil.*;
 public class PlayerMocker extends Mocker<Player> {
     final Function<String, Level> levelSupplier;
     final MockPlayer config;
-    
-    Player player;
 
+    Level level;
+    Player player;
     String playerName;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
@@ -67,9 +67,21 @@ public class PlayerMocker extends Mocker<Player> {
         this.levelSupplier = levelSupplier;
     }
 
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public void prepare() {
+        level = levelSupplier.apply(config.level());
+        String name = config.name();
+        if (name.isEmpty()) {
+            name = "TestPlayer"+ThreadLocalRandom.current().nextLong();
+            if (name.length() > 16) {
+                name = name.substring(0, 16);
+            }
+        }
+        playerName = name;
+    }
+
     @Override
     public Player create() {
-        Level level = levelSupplier.apply(config.level());
         Vector3 pos = AnnotationParser.parseVector3(config.position());
         int chunkX = pos.getChunkX();
         int chunkZ = pos.getChunkZ();
@@ -115,14 +127,8 @@ public class PlayerMocker extends Mocker<Player> {
         player = mock(Player.class, withSettings().defaultAnswer(CALLS_REAL_METHODS)
                 .useConstructor(sourceInterface, clientId, clientIp, clientPort));
         
-        String name = config.name();
-        if (name.isEmpty()) {
-            name = "TestPlayer"+ThreadLocalRandom.current().nextDouble();
-        }
-        playerName = name;
-        
         LoginPacket loginPacket = new LoginPacket();
-        loginPacket.username = name;
+        loginPacket.username = playerName;
         loginPacket.protocol = ProtocolInfo.CURRENT_PROTOCOL;
         loginPacket.clientId = clientId;
         loginPacket.clientUUID = config.clientUUID().length == 2? new UUID(config.clientUUID()[0], config.clientUUID()[1]) : UUID.randomUUID();

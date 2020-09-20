@@ -48,4 +48,7 @@ public @interface MockLevel {
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     int[] spawn() default {0, 64, 0};
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    boolean isDefault() default false;
 }

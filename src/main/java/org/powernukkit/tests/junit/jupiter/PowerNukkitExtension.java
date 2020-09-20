@@ -37,6 +37,7 @@ import cn.nukkit.potion.Effect;
 import cn.nukkit.potion.Potion;
 import org.apiguardian.api.API;
 import org.junit.jupiter.api.extension.AfterAllCallback;
+import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.junit.jupiter.api.extension.TestInstancePostProcessor;
 import org.junit.platform.commons.support.AnnotationSupport;
@@ -52,14 +53,14 @@ import org.powernukkit.tests.mocks.ServerMocker;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.junit.jupiter.api.extension.ExtensionContext.Namespace.create;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.lenient;
 import static org.powernukkit.tests.api.ReflectionUtil.execute;
 import static org.powernukkit.tests.api.ReflectionUtil.setField;
 
@@ -68,7 +69,7 @@ import static org.powernukkit.tests.api.ReflectionUtil.setField;
  */
 @API(since = "0.1.0", status = EXPERIMENTAL)
 @MockServer(name = "TinyTestServer", initPrivateFields = false, callsRealMethods = false, createTempDir = false)
-public class PowerNukkitExtension extends MockitoExtension implements TestInstancePostProcessor, AfterAllCallback {
+public class PowerNukkitExtension extends MockitoExtension implements TestInstancePostProcessor, BeforeAllCallback, AfterAllCallback {
     private static final ExtensionContext.Namespace POWERNUKKIT = create("org.powernukkit");
     private static final String SESSION = "session";
     
@@ -87,10 +88,10 @@ public class PowerNukkitExtension extends MockitoExtension implements TestInstan
     @MockLevel
     @MockEntity
     private static final Void defaults = null;
-    
+
     @Override
-    public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws ReflectiveOperationException {
-        MockServer config = testInstance.getClass().getAnnotation(MockServer.class);
+    public void beforeAll(ExtensionContext context) throws Exception {
+        MockServer config = context.getRequiredTestClass().getAnnotation(MockServer.class);
         if (config == null) {
             config = PowerNukkitExtension.class.getAnnotation(MockServer.class);
         }
@@ -106,6 +107,11 @@ public class PowerNukkitExtension extends MockitoExtension implements TestInstan
         serverMocker.setActive();
         
         initStatics(server);
+    }
+
+    @Override
+    public void postProcessTestInstance(Object testInstance, ExtensionContext context) throws Exception {
+        Session session = context.getStore(POWERNUKKIT).get(SESSION, Session.class);
         
         Map<String, List<LevelMocker>> levels = session.levels;
         for (Field field : AnnotationSupport.findAnnotatedFields(context.getRequiredTestClass(), MockLevel.class)) {
@@ -151,9 +157,45 @@ public class PowerNukkitExtension extends MockitoExtension implements TestInstan
         
         for (Field field: AnnotationSupport.findAnnotatedFields(context.getRequiredTestClass(), MockPlayer.class)) {
             PlayerMocker playerMocker = new PlayerMocker(levelProvider, field.getAnnotation(MockPlayer.class));
-            playerMocker.createAndSet(testInstance, field);
+            playerMocker.prepare();
+            playerMocker.setInstance(testInstance);
+            playerMocker.setInstanceField(field);
             session.players.computeIfAbsent(playerMocker.getPlayerName(), it-> new ArrayList<>()).add(playerMocker);
         }
+
+        Map<Integer, Level> loadedLevels;
+        if (session.serverMocker.getConfig().callsRealMethods()) {
+            loadedLevels = session.serverMocker.getServer().getLevels();
+        } else {
+            loadedLevels = new LinkedHashMap<>();
+        }
+
+        levels.values().stream().flatMap(Collection::stream)
+                .map(LevelMocker::getLevel)
+                .forEachOrdered(mock-> loadedLevels.put(mock.getId(), mock));
+        
+        Level defaultLevel = levels.values().stream().flatMap(Collection::stream)
+                .filter(mocker-> mocker.getConfig().isDefault())
+                .map(LevelMocker::getLevel)
+                .findFirst()
+                .orElseGet(()-> levels.values().stream().flatMap(Collection::stream).findFirst().map(LevelMocker::getLevel).orElse(null));
+        
+        if (!session.serverMocker.getConfig().callsRealMethods()) {
+            Server server = session.serverMocker.getServer();
+            lenient().when(server.getLevel(anyInt())).thenAnswer(call-> loadedLevels.get(call.getArgument(0, Integer.class)));
+            lenient().when(server.getLevelByName(anyString())).thenAnswer(call-> loadedLevels.values().stream()
+                    .filter(level-> level.getName().equals(call.getArgument(0)))
+                    .findFirst().orElse(null));
+            
+            lenient().when(server.isLevelLoaded(anyString())).thenAnswer(call-> loadedLevels.values().stream()
+                    .anyMatch(level-> level.getName().equals(call.getArgument(0))));
+            lenient().when(server.getLevels()).thenReturn(loadedLevels);
+        }
+        
+        session.serverMocker.getServer().setDefaultLevel(defaultLevel);
+        
+        session.players.values().stream().flatMap(Collection::stream)
+                .forEachOrdered(playerMocker -> execute(playerMocker::recreate));
     }
 
     @Override

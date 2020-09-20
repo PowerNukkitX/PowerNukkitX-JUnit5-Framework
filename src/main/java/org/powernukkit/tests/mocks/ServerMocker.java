@@ -46,6 +46,7 @@ import org.apiguardian.api.API;
 import org.iq80.leveldb.DB;
 import org.iq80.leveldb.util.FileUtils;
 import org.mockito.Mock;
+import org.mockito.MockSettings;
 import org.mockito.MockitoAnnotations;
 import org.mockito.internal.configuration.injection.scanner.MockScanner;
 import org.mockito.internal.util.collections.Sets;
@@ -56,6 +57,7 @@ import javax.annotation.Nullable;
 import java.io.File;
 import java.io.InputStream;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -74,6 +76,27 @@ public class ServerMocker extends Mocker<Server> {
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public static void setServerInstance(@Nullable Server server) {
         execute(()-> setField(null, Server.class.getDeclaredField("instance"), server));
+    }
+    
+    private static final Class<?> classPositionTrackingService;
+    private static final Method getPositionTrackingService;
+    private static final Field positionTrackingServiceField;
+    static {
+        Class<?> c;
+        Method m;
+        Field f;
+        try {
+            c = Class.forName("cn.nukkit.positiontracking.PositionTrackingService");
+            m = Server.class.getDeclaredMethod("getPositionTrackingService");
+            f = Server.class.getDeclaredField("positionTrackingService");
+        } catch (ReflectiveOperationException ignored) {
+            c = null;
+            m = null;
+            f = null;
+        }
+        classPositionTrackingService = c;
+        getPositionTrackingService = m;
+        positionTrackingServiceField = f;
     }
     
     private MockServer config;
@@ -117,6 +140,8 @@ public class ServerMocker extends Mocker<Server> {
     @Mock
     ServerScheduler serverScheduler;
     
+    Object posTrackingService;
+    
     File tempDir;
     File worldsDir;
     File playersDir;
@@ -124,6 +149,7 @@ public class ServerMocker extends Mocker<Server> {
     File resourcePacksDir;
     File bannedPlayersFile;
     File bannedIpsFile;
+    File posTrackingServiceDir;
     
     Server server;
     
@@ -161,6 +187,28 @@ public class ServerMocker extends Mocker<Server> {
             resourcePacksDir = new File(tempDir, "resource_packs");
             bannedPlayersFile = new File(tempDir, "banned-players.json");
             bannedIpsFile = new File(tempDir, "banned-ips.json");
+            if (positionTrackingServiceField != null) {
+                posTrackingServiceDir = new File(tempDir, "services/position_tracking_db");
+            }
+        }
+
+        if (positionTrackingServiceField != null) {
+            boolean delete = false;
+            if (posTrackingServiceDir == null) {
+                posTrackingServiceDir = Files.createTempDir();
+                delete = true;
+            }
+            
+            MockSettings mockSettings = withSettings().useConstructor(posTrackingServiceDir);
+            if (config.callsRealMethods()) {
+                mockSettings = mockSettings.defaultAnswer(CALLS_REAL_METHODS);
+            }
+            
+            posTrackingService = mock(classPositionTrackingService, mockSettings);
+            
+            if (delete) {
+                FileUtils.deleteRecursively(posTrackingServiceDir);
+            }
         }
         
         setField(server, Server.class.getDeclaredField("isRunning"), new AtomicBoolean(true));
@@ -168,9 +216,13 @@ public class ServerMocker extends Mocker<Server> {
         if (!config.callsRealMethods()) {
             BanList nameBans = mock(BanList.class);
             BanList ipBans = mock(BanList.class);
-
+            
             setField(server, Server.class.getDeclaredField("playerDataSerializer"), playerDataSerializer);
             setField(server, Server.class.getDeclaredField("pluginManager"), pluginManager);
+            
+            if (posTrackingService != null) {
+                lenient().when(getPositionTrackingService.invoke(server)).thenReturn(posTrackingService);
+            }
             
             lenient().when(server.getConfig(anyString(), any())).thenAnswer(call-> call.getArgument(1));
             lenient().when(server.getConfig()).thenReturn(new Config());
@@ -254,6 +306,10 @@ public class ServerMocker extends Mocker<Server> {
             nukkitYml.load(in);
         }
         
+        if (posTrackingService != null && positionTrackingServiceField != null) {
+            setField(server, positionTrackingServiceField, posTrackingService);
+        }
+        
         setField(server, Server.class.getDeclaredField("properties"), serverProperties);
         setField(server, Server.class.getDeclaredField("config"), nukkitYml);
         setField(server, Server.class.getDeclaredField("operators"), new Config());
@@ -321,6 +377,11 @@ public class ServerMocker extends Mocker<Server> {
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public Server getServer() {
         return server;
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.0")
+    public MockServer getConfig() {
+        return config;
     }
 
     public void releaseResources() {

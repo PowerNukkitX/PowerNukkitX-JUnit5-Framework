@@ -11,21 +11,13 @@
 easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit itself.
 
 ## Adding as Dependency
-This library is currently under development, so only snapshots are available.
-
 ### Maven
 ```xml
-    <repositories>
-        <repository>
-            <id>powernukkit-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.powernukkit</groupId>
             <artifactId>powernukkit-tests-junit5</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -33,12 +25,8 @@ This library is currently under development, so only snapshots are available.
 
 ### Gradle
 ```groovy
-repositories {
-    mavenCentral()
-    maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
-}
 dependencies {
-    testImplementation 'org.powernukkit:powernukkit-tests-junit5:0.1.0-SNAPSHOT'
+    testImplementation 'org.powernukkit:powernukkit-tests-junit5:0.1.0'
 }
 ```
 
@@ -63,4 +51,4 @@ class MyAwesomeTest {
 
 ## Java Documentation
 The javadoc files can be viewed online at:  
-https://powernukkit.github.io/PowerNukkit-JUnit5-Framework/javadoc/0.1.0-SNAPSHOT
+https://powernukkit.github.io/PowerNukkit-JUnit5-Framework/javadoc/0.1.0

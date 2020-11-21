@@ -27,7 +27,7 @@
 
     <groupId>org.powernukkit</groupId>
     <artifactId>powernukkit-tests-junit5</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
     
     <name>PowerNukkit JUnit 5 Testing Framework</name>
     <description>Provides a JUnit 5 extension that prepares the PowerNukkit environment to execute tests without having to create too many mocks</description>

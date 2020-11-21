@@ -13,6 +13,15 @@ easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit
 ## Adding as Dependency
 ### Maven
 ```xml
+    <repositories>
+        <repository>
+            <id>powernukkit-bintray</id>
+            <name>powernukkit-bintray</name>
+            <url>https://dl.bintray.com/powernukkit/powernukkit</url>
+            <releases><enabled>true</enabled></releases>
+            <snapshots><enabled>false</enabled></snapshots>
+        </repository>
+    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.powernukkit</groupId>
@@ -25,6 +34,10 @@ easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit
 
 ### Gradle
 ```groovy
+repositories {
+    mavenCentral()
+    maven { url 'https://dl.bintray.com/powernukkit/powernukkit' }
+}
 dependencies {
     testImplementation 'org.powernukkit:powernukkit-tests-junit5:0.1.0'
 }

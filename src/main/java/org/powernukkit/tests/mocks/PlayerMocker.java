@@ -23,8 +23,6 @@ import cn.nukkit.Server;
 import cn.nukkit.entity.data.Skin;
 import cn.nukkit.level.Level;
 import cn.nukkit.level.Position;
-import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.LoginPacket;
@@ -42,18 +40,15 @@ import java.util.function.Function;
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.powernukkit.tests.api.ReflectionUtil.*;
 
 /**
  * @author joserobjr
  */
-public class PlayerMocker extends Mocker<Player> {
-    final Function<String, Level> levelSupplier;
+public class PlayerMocker extends ChunkBoundMocker<Player> {
     final MockPlayer config;
 
-    Level level;
     Player player;
     String playerName;
 
@@ -64,13 +59,24 @@ public class PlayerMocker extends Mocker<Player> {
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public PlayerMocker(Function<String, Level> levelSupplier, MockPlayer config) {
+        super(levelSupplier);
         this.config = config;
-        this.levelSupplier = levelSupplier;
     }
 
+    @Override
+    protected String getLevelName() {
+        return config.level();
+    }
+
+    @Override
+    protected Vector3 getSpawnPos() {
+        return AnnotationParser.parseVector3(config.position());
+    }
+
+    @Override
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public void prepare() {
-        level = levelSupplier.apply(config.level());
+        super.prepare();
         String name = config.name();
         if (name.isEmpty()) {
             name = "TestPlayer"+ThreadLocalRandom.current().nextInt(0, 999999);
@@ -83,21 +89,6 @@ public class PlayerMocker extends Mocker<Player> {
 
     @Override
     public Player create() {
-        Vector3 pos = AnnotationParser.parseVector3(config.position());
-        int chunkX = pos.getChunkX();
-        int chunkZ = pos.getChunkZ();
-        BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
-        if (chunk == null) {
-            chunk = mock(BaseFullChunk.class);
-            LevelProvider provider = mock(LevelProvider.class);
-            lenient().when(provider.getChunk(eq(chunkX), eq(chunkZ))).thenReturn(chunk);
-            lenient().when(provider.getLevel()).thenReturn(level);
-            
-            lenient().doCallRealMethod().when(chunk).setPosition(anyInt(), anyInt());
-            chunk.setPosition(chunkX, chunkZ);
-            lenient().when(chunk.getProvider()).thenReturn(provider);
-        }
-
         /// Setup skin ///
         Skin skin = new Skin();
         skin.setSkinId("TestSkin"+ThreadLocalRandom.current().nextDouble());

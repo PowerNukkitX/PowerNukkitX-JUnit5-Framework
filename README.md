@@ -13,20 +13,11 @@ easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit
 ## Adding as Dependency
 ### Maven
 ```xml
-    <repositories>
-        <repository>
-            <id>powernukkit-bintray</id>
-            <name>powernukkit-bintray</name>
-            <url>https://dl.bintray.com/powernukkit/powernukkit</url>
-            <releases><enabled>true</enabled></releases>
-            <snapshots><enabled>false</enabled></snapshots>
-        </repository>
-    </repositories>
     <dependencies>
         <dependency>
             <groupId>org.powernukkit</groupId>
             <artifactId>powernukkit-tests-junit5</artifactId>
-            <version>0.1.0</version>
+            <version>0.1.1</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -36,10 +27,9 @@ easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit
 ```groovy
 repositories {
     mavenCentral()
-    maven { url 'https://dl.bintray.com/powernukkit/powernukkit' }
 }
 dependencies {
-    testImplementation 'org.powernukkit:powernukkit-tests-junit5:0.1.0'
+    testImplementation 'org.powernukkit:powernukkit-tests-junit5:0.1.1'
 }
 ```
 
@@ -61,6 +51,9 @@ class MyAwesomeTest {
     }
 }
 ```
+
+There are tons of usage example at https://github.com/PowerNukkit/PowerNukkit/tree/master/src/test because we use
+this extension to test PowerNukkit itself using JUnit5.
 
 ## Java Documentation
 The javadoc files can be viewed online at:  

@@ -20,8 +20,6 @@ package org.powernukkit.tests.mocks;
 
 import cn.nukkit.entity.Entity;
 import cn.nukkit.level.Level;
-import cn.nukkit.level.format.LevelProvider;
-import cn.nukkit.level.format.generic.BaseFullChunk;
 import cn.nukkit.math.Vector3;
 import cn.nukkit.nbt.tag.CompoundTag;
 import org.apiguardian.api.API;
@@ -31,7 +29,6 @@ import org.powernukkit.tests.junit.jupiter.PowerNukkitExtension;
 import java.util.function.Function;
 
 import static org.apiguardian.api.API.Status.EXPERIMENTAL;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.powernukkit.tests.api.ReflectionUtil.supply;
 
@@ -39,43 +36,52 @@ import static org.powernukkit.tests.api.ReflectionUtil.supply;
  * @author joserobjr
  */
 @API(status = EXPERIMENTAL, since = "0.1.0")
-public class EntityMocker extends Mocker<Entity> {
-    final Function<String, Level> levelSupplier;
+public class EntityMocker extends ChunkBoundMocker<Entity> {
     final MockEntity config;
+    final Class<? extends Entity> fieldType;
     
     Entity entity;
 
+    private static MockEntity defaultMockEntity() {
+        return supply(()-> PowerNukkitExtension.class.getDeclaredField("defaults").getAnnotation(MockEntity.class));
+    }
+
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public EntityMocker(Function<String, Level> levelSupplier) {
-        this(levelSupplier, supply(()-> PowerNukkitExtension.class.getDeclaredField("defaults").getAnnotation(MockEntity.class)));
+        this(levelSupplier, defaultMockEntity());
     }
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public EntityMocker(Function<String, Level> levelSupplier, MockEntity config) {
-        this.levelSupplier = levelSupplier;
+        this(levelSupplier, config.type(), config);
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.1")
+    public EntityMocker(Function<String, Level> levelSupplier, Class<? extends Entity> fieldType) {
+        this(levelSupplier, fieldType, defaultMockEntity());
+    }
+
+    @API(status = EXPERIMENTAL, since = "0.1.1")
+    public EntityMocker(Function<String, Level> levelSupplier, Class<? extends Entity> fieldType, MockEntity config) {
+        super(levelSupplier);
+        this.fieldType = fieldType;
         this.config = config;
     }
 
     @Override
+    protected String getLevelName() {
+        return config.level();
+    }
+
+    @Override
+    protected Vector3 getSpawnPos() {
+        return AnnotationParser.parseVector3(config.position());
+    }
+
+    @Override
     public Entity create() {
-        Level level = levelSupplier.apply(config.level());
-        Vector3 pos = AnnotationParser.parseVector3(config.position());
         CompoundTag nbt = Entity.getDefaultNBT(pos, new Vector3(), config.yaw(), config.pitch());
-        int chunkX = pos.getChunkX();
-        int chunkZ = pos.getChunkZ();
-        BaseFullChunk chunk = level.getChunk(chunkX, chunkZ);
-        if (chunk == null) {
-            chunk = mock(BaseFullChunk.class);
-            LevelProvider provider = mock(LevelProvider.class);
-            lenient().when(provider.getChunk(eq(chunkX), eq(chunkZ))).thenReturn(chunk);
-            lenient().when(provider.getLevel()).thenReturn(level);
-
-            lenient().when(chunk.getX()).thenReturn(chunkX);
-            lenient().when(chunk.getZ()).thenReturn(chunkZ);
-            lenient().when(chunk.getProvider()).thenReturn(provider);
-        }
-
-        entity = mock(config.type(), withSettings().defaultAnswer(CALLS_REAL_METHODS).useConstructor(chunk, nbt));
+        entity = mock(fieldType, withSettings().defaultAnswer(CALLS_REAL_METHODS).useConstructor(chunk, nbt));
         entity.noDamageTicks = 0;
         return entity;
     }

@@ -22,6 +22,7 @@ import cn.nukkit.Server;
 import cn.nukkit.block.Block;
 import cn.nukkit.dispenser.DispenseBehaviorRegister;
 import cn.nukkit.entity.Attribute;
+import cn.nukkit.entity.Entity;
 import cn.nukkit.item.Item;
 import cn.nukkit.item.enchantment.Enchantment;
 import cn.nukkit.level.GlobalBlockPalette;
@@ -150,9 +151,22 @@ public class PowerNukkitExtension extends MockitoExtension implements TestInstan
         };
         
         for (Field field: AnnotationSupport.findAnnotatedFields(context.getRequiredTestClass(), MockEntity.class)) {
-            EntityMocker playerMocker = new EntityMocker(levelProvider, field.getAnnotation(MockEntity.class));
-            playerMocker.createAndSet(testInstance, field);
-            session.entities.add(playerMocker);
+            Class<?> type = field.getType();
+            Class<? extends Entity> entityType;
+            if (!Entity.class.isAssignableFrom(type)) {
+                throw new AssertionError("@MockEntity must be used on fields of type Entity or higher.");
+            }
+            MockEntity annotation = field.getAnnotation(MockEntity.class);
+            if (!annotation.type().equals(Entity.class)) {
+                entityType = annotation.type();
+            } else {
+                //noinspection unchecked
+                entityType = (Class<? extends Entity>) field.getType();
+            }
+            EntityMocker entityMocker = new EntityMocker(levelProvider, entityType, annotation);
+            entityMocker.prepare();
+            entityMocker.createAndSet(testInstance, field);
+            session.entities.add(entityMocker);
         }
         
         for (Field field: AnnotationSupport.findAnnotatedFields(context.getRequiredTestClass(), MockPlayer.class)) {
@@ -226,11 +240,11 @@ public class PowerNukkitExtension extends MockitoExtension implements TestInstan
 
         Block.init();
         Enchantment.init();
+        Potion.init();
+        Effect.init();
+        Attribute.init();
         Item.init();
         EnumBiome.values(); //load class, this also registers biomes
-        Effect.init();
-        Potion.init();
-        Attribute.init();
         DispenseBehaviorRegister.init();
         GlobalBlockPalette.getOrCreateRuntimeId(0, 0); //Force it to load
 

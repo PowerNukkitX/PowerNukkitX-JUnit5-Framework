@@ -13,6 +13,16 @@ easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit
 ## Adding as Dependency
 ### Maven
 ```xml
+<repository>
+    <id>maven-powernukkitx-cn</id>
+    <url>https://maven.powernukkitx.cn/repository/maven-public/</url>
+    <releases>
+        <enabled>true</enabled>
+    </releases>
+    <snapshots>
+        <enabled>true</enabled>
+    </snapshots>
+</repository>
 
 <dependencies>
     <dependency>

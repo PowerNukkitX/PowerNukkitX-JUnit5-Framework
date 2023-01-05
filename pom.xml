@@ -71,23 +71,23 @@
 
     <distributionManagement>
         <repository>
-            <id>powernukkit-releases</id>
-            <name>powernukkit-releases</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <id>powernukkitx-releases</id>
+            <name>powernukkitx-releases</name>
+            <url>https://maven.powernukkitx.cn/repository/maven-releases/</url>
         </repository>
         <snapshotRepository>
-            <id>powernukkit-snapshots</id>
-            <name>powernukkit-snapshots</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>powernukkitx-snapshots</id>
+            <name>powernukkitx-snapshots</name>
+            <url>https://maven.powernukkitx.cn/repository/maven-snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
     <properties>
         <skipTests>false</skipTests>
-        <skipGpg>false</skipGpg>
+        <skipGpg>true</skipGpg>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <powernukkit.version>1.19.50-r3</powernukkit.version>
+        <powernukkitx.version>1.19.50-r3</powernukkitx.version>
         <lombok.version>1.18.24</lombok.version>
 
         <maven.compiler.source>17</maven.compiler.source>
@@ -102,7 +102,7 @@
         <dependency>
             <groupId>cn.powernukkitx</groupId>
             <artifactId>powernukkitx</artifactId>
-            <version>${powernukkit.version}</version>
+            <version>${powernukkitx.version}</version>
             <scope>provided</scope>
             <exclusions>
                 <exclusion>
@@ -245,7 +245,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration> <!-- add this to disable checking -->
-                    <source>8</source>
+                    <source>17</source>
                     <doclint>none</doclint>
                     <quiet>true</quiet>
                     <sourcepath>${project.build.directory}/delombok</sourcepath>
@@ -295,7 +295,7 @@
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
                 <configuration>
-                    <source>8</source>
+                    <source>17</source>
                     <doclint>none</doclint>
                     <quiet>true</quiet>
                 </configuration>

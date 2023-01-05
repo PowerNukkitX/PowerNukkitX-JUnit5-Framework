@@ -7,7 +7,7 @@
 
 **[JUnit](https://junit.org)** is a very popular Java test unit framework.
 
-**PowerNukkit JUnit 5 Testing Framework** is an extension to JUnit 5 that allows developers to create
+**PowerNukkitX JUnit 5 Testing Framework** is an extension to JUnit 5 that allows developers to create
 easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit itself.
 
 ## Adding as Dependency

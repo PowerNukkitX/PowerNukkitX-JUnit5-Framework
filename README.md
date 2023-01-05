@@ -13,14 +13,15 @@ easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit
 ## Adding as Dependency
 ### Maven
 ```xml
-    <dependencies>
-        <dependency>
-            <groupId>org.powernukkit</groupId>
-            <artifactId>powernukkit-tests-junit5</artifactId>
-            <version>0.1.1</version>
-            <scope>test</scope>
-        </dependency>
-    </dependencies>
+
+<dependencies>
+    <dependency>
+        <groupId>cn.powernukkitx</groupId>
+        <artifactId>powernukkitx-tests-junit5</artifactId>
+        <version>0.0.1</version>
+        <scope>test</scope>
+    </dependency>
+</dependencies>
 ```
 
 ### Gradle
@@ -29,7 +30,7 @@ repositories {
     mavenCentral()
 }
 dependencies {
-    testImplementation 'org.powernukkit:powernukkit-tests-junit5:0.1.1'
+    testImplementation 'cn.powernukkitx:powernukkitx-tests-junit5:0.0.1'
 }
 ```
 

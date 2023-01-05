@@ -48,13 +48,12 @@ import static org.powernukkit.tests.api.ReflectionUtil.*;
  */
 public class PlayerMocker extends ChunkBoundMocker<Player> {
     final MockPlayer config;
-
-    Player player;
+    DelegatePlayer player;
     String playerName;
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
     public PlayerMocker(Function<String, Level> levelSupplier) {
-        this(levelSupplier, supply(()-> PowerNukkitExtension.class.getDeclaredField("defaults").getAnnotation(MockPlayer.class)));
+        this(levelSupplier, supply(() -> PowerNukkitExtension.class.getDeclaredField("defaults").getAnnotation(MockPlayer.class)));
     }
 
     @API(status = EXPERIMENTAL, since = "0.1.0")
@@ -79,7 +78,7 @@ public class PlayerMocker extends ChunkBoundMocker<Player> {
         super.prepare();
         String name = config.name();
         if (name.isEmpty()) {
-            name = "TestPlayer"+ThreadLocalRandom.current().nextInt(0, 999999);
+            name = "TestPlayer" + ThreadLocalRandom.current().nextInt(0, 999999);
             if (name.length() > 16) {
                 name = name.substring(0, 16);
             }
@@ -91,7 +90,7 @@ public class PlayerMocker extends ChunkBoundMocker<Player> {
     public Player create() {
         /// Setup skin ///
         Skin skin = new Skin();
-        skin.setSkinId("TestSkin"+ThreadLocalRandom.current().nextDouble());
+        skin.setSkinId("TestSkin" + ThreadLocalRandom.current().nextDouble());
         skin.setSkinData(new BufferedImage(64, 32, BufferedImage.TYPE_INT_BGR));
         assertTrue(skin.isValid());
 
@@ -105,35 +104,35 @@ public class PlayerMocker extends ChunkBoundMocker<Player> {
         String clientIp = config.clientIp();
         if (clientIp.isEmpty()) {
             ThreadLocalRandom random = ThreadLocalRandom.current();
-            clientIp = random.nextInt(1, 255)+"."
-                    +random.nextInt(1, 255)+"."
-                    +random.nextInt(1, 255)+"."
-                    +random.nextInt(1, 255);
+            clientIp = random.nextInt(1, 255) + "."
+                    + random.nextInt(1, 255) + "."
+                    + random.nextInt(1, 255) + "."
+                    + random.nextInt(1, 255);
         }
-        
+
         int clientPort = config.clientPort();
         if (clientPort == 0) {
             clientPort = ThreadLocalRandom.current().nextInt(1, 0xFFFF);
         }
 
-        player = mock(Player.class, withSettings().defaultAnswer(CALLS_REAL_METHODS)
+        player = mock(DelegatePlayer.class, withSettings().defaultAnswer(CALLS_REAL_METHODS)
                 .useConstructor(sourceInterface, clientId, clientIp, clientPort));
-        
+
         LoginPacket loginPacket = new LoginPacket();
         loginPacket.username = playerName;
         loginPacket.protocol = ProtocolInfo.CURRENT_PROTOCOL;
         loginPacket.clientId = clientId;
-        loginPacket.clientUUID = config.clientUUID().length == 2? new UUID(config.clientUUID()[0], config.clientUUID()[1]) : UUID.randomUUID();
+        loginPacket.clientUUID = config.clientUUID().length == 2 ? new UUID(config.clientUUID()[0], config.clientUUID()[1]) : UUID.randomUUID();
         loginPacket.skin = skin;
         loginPacket.putLInt(2);
         loginPacket.put("{}".getBytes());
         loginPacket.putLInt(0);
-        execute(()-> setField(Server.getInstance(), Server.class.getDeclaredField("defaultLevel"), level));
+        execute(() -> setField(Server.getInstance(), Server.class.getDeclaredField("defaultLevel"), level));
         doCallRealMethod().when(Server.getInstance()).getDefaultLevel();
         doReturn(new Position(pos.x, pos.y, pos.z, level)).when(level).getSafeSpawn();
         player.handleDataPacket(loginPacket);
-        assertNotNull(player.namedTag, ()-> "Failed to initialize the player mock for "+getPlayerName());
-        execute(()-> {
+        assertNotNull(player.namedTag, () -> "Failed to initialize the player mock for " + getPlayerName());
+        execute(() -> {
             Method method = Player.class.getDeclaredMethod("completeLoginSequence");
             method.setAccessible(true);
             method.invoke(player);
@@ -141,17 +140,17 @@ public class PlayerMocker extends ChunkBoundMocker<Player> {
 
         assertTrue(player.isOnline(), "Failed to make the fake player login");
 
-        execute(()-> {
+        execute(() -> {
             Method method = Player.class.getDeclaredMethod("doFirstSpawn");
             method.setAccessible(true);
             method.invoke(player);
         });
-        
+
         player.yaw = config.yaw();
         player.pitch = config.pitch();
         player.setHealth(config.health());
         player.noDamageTicks = 0;
-        
+
         return player;
     }
 

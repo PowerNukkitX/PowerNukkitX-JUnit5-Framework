@@ -227,7 +227,9 @@ public class MemoryLevelProvider extends BaseLevelProvider {
             }
         }
         for (int i = 0; i < count; i++) {
-            stream.put(sections[i].getBytes());
+            BinaryStream tmp = new BinaryStream();
+            sections[i].writeTo(tmp);
+            stream.put(tmp.getBuffer());
         }
         stream.put(chunk.getBiomeIdArray());
         stream.putByte((byte) 0);

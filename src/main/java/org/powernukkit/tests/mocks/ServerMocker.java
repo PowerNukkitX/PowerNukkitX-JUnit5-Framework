@@ -37,6 +37,9 @@ import cn.nukkit.plugin.PluginManager;
 import cn.nukkit.plugin.service.NKServiceManager;
 import cn.nukkit.resourcepacks.ResourcePackManager;
 import cn.nukkit.scheduler.ServerScheduler;
+import cn.nukkit.scoreboard.manager.IScoreboardManager;
+import cn.nukkit.scoreboard.manager.ScoreboardManager;
+import cn.nukkit.scoreboard.storage.JSONScoreboardStorage;
 import cn.nukkit.utils.Config;
 import cn.nukkit.utils.PlayerDataSerializer;
 import cn.nukkit.utils.Watchdog;
@@ -103,6 +106,9 @@ public class ServerMocker extends Mocker<Server> {
     
     @Mock
     PluginManager pluginManager;
+
+    @Mock
+    ScoreboardManager scoreboardManager;
     
     @Mock
     PlayerDataSerializer playerDataSerializer;
@@ -146,6 +152,7 @@ public class ServerMocker extends Mocker<Server> {
     File worldsDir;
     File playersDir;
     File pluginsDir;
+    File command_data;
     File resourcePacksDir;
     File bannedPlayersFile;
     File bannedIpsFile;
@@ -184,6 +191,7 @@ public class ServerMocker extends Mocker<Server> {
             worldsDir = new File(tempDir, "worlds");
             playersDir = new File(tempDir, "players");
             pluginsDir = new File(tempDir, "plugins");
+            command_data = new File(tempDir, "command_data");
             resourcePacksDir = new File(tempDir, "resource_packs");
             bannedPlayersFile = new File(tempDir, "banned-players.json");
             bannedIpsFile = new File(tempDir, "banned-ips.json");
@@ -227,6 +235,7 @@ public class ServerMocker extends Mocker<Server> {
             lenient().when(server.getConfig(anyString(), any())).thenAnswer(call-> call.getArgument(1));
             lenient().when(server.getConfig()).thenReturn(new Config());
             lenient().when(server.getPluginManager()).thenReturn(pluginManager);
+            lenient().when(server.getScoreboardManager()).thenReturn(scoreboardManager);
             lenient().when(server.getPlayerDataSerializer()).thenCallRealMethod();
             lenient().when(server.getConsoleSender()).thenReturn(new ConsoleCommandSender());
             lenient().when(server.getNetwork()).thenReturn(network);
@@ -340,6 +349,7 @@ public class ServerMocker extends Mocker<Server> {
         setField(server, Server.class.getDeclaredField("baseLang"), baseLang);
         setField(server, Server.class.getDeclaredField("allowNether"), true);
 
+        setField(server, Server.class.getDeclaredField("scoreboardManager"), new ScoreboardManager(new JSONScoreboardStorage(command_data.getAbsolutePath())));
         setField(server, Server.class.getDeclaredField("commandMap"), new SimpleCommandMap(server));
         setField(server, Server.class.getDeclaredField("craftingManager"), new CraftingManager());
         setField(server, Server.class.getDeclaredField("resourcePackManager"), new ResourcePackManager(resourcePacksDir));

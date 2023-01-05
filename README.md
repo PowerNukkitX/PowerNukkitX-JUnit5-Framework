@@ -2,13 +2,13 @@
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE) [![Discord](https://img.shields.io/discord/728280425255927879)](https://powernukkit.org/discord)
 
-# PowerNukkit JUnit 5 Testing Framework 
-**[PowerNukkit](https://powernukkit.org)** is a modified version of Nukkit that adds support to a huge amount of features like water-logging, all new blocks, more plugin events, offhand slot, bug fixes and many more.
+# PowerNukkitX JUnit 5 Testing Framework 
+**[PowerNukkitX](https://powernukkit.org)** is a modified version of Nukkit that adds support to a huge amount of features like water-logging, all new blocks, more plugin events, offhand slot, bug fixes and many more.
 
 **[JUnit](https://junit.org)** is a very popular Java test unit framework.
 
-**PowerNukkit JUnit 5 Testing Framework** is an extension to JUnit 5 that allows developers to create
-easier PowerNukkit testing codes when developing plugins, tools, and PowerNukkit itself.
+**PowerNukkitX JUnit 5 Testing Framework** is an extension to JUnit 5 that allows developers to create
+easier PowerNukkitX testing codes when developing plugins, tools, and PowerNukkitX itself.
 
 ## Adding as Dependency
 ### Maven

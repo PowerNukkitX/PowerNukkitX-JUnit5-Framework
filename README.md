@@ -64,7 +64,7 @@ class MyAwesomeTest {
 ```
 
 There are tons of usage example at https://github.com/PowerNukkit/PowerNukkit/tree/master/src/test because we use
-this extension to test PowerNukkit itself using JUnit5.
+this extension to test PowerNukkitX itself using JUnit5.
 
 ## Java Documentation
 The javadoc files can be viewed online at:  

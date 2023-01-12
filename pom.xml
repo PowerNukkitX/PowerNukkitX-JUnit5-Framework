@@ -27,8 +27,8 @@
 
     <groupId>cn.powernukkitx</groupId>
     <artifactId>powernukkitx-tests-junit5</artifactId>
-    <!-- mvn install:install-file -Dfile=target/powernukkitx-tests-junit5-0.0.1.jar -DgroupId=cn.powernukkitx -DartifactId=powernukkitx-tests-junit5 -Dversion=0.0.1 -Dpackaging=jar-->
-    <version>0.0.1</version>
+    <!-- mvn install:install-file -Dfile=target/powernukkitx-tests-junit5-0.0.2.jar -DgroupId=cn.powernukkitx -DartifactId=powernukkitx-tests-junit5 -Dversion=0.0.2 -Dpackaging=jar-->
+    <version>0.0.2</version>
     
     <name>PowerNukkit JUnit 5 Testing Framework</name>
     <description>Provides a JUnit 5 extension that prepares the PowerNukkit environment to execute tests without having to create too many mocks</description>

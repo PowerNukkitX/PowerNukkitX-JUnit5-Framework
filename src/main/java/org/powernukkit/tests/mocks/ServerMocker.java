@@ -21,6 +21,7 @@ package org.powernukkit.tests.mocks;
 import cn.nukkit.Server;
 import cn.nukkit.command.ConsoleCommandSender;
 import cn.nukkit.command.SimpleCommandMap;
+import cn.nukkit.command.function.FunctionManager;
 import cn.nukkit.console.NukkitConsole;
 import cn.nukkit.event.server.QueryRegenerateEvent;
 import cn.nukkit.inventory.CraftingManager;
@@ -109,7 +110,9 @@ public class ServerMocker extends Mocker<Server> {
 
     @Mock
     ScoreboardManager scoreboardManager;
-    
+    @Mock
+    FunctionManager functionManager;
+
     @Mock
     PlayerDataSerializer playerDataSerializer;
     
@@ -236,6 +239,7 @@ public class ServerMocker extends Mocker<Server> {
             lenient().when(server.getConfig()).thenReturn(new Config());
             lenient().when(server.getPluginManager()).thenReturn(pluginManager);
             lenient().when(server.getScoreboardManager()).thenReturn(scoreboardManager);
+            lenient().when(server.getFunctionManager()).thenReturn(functionManager);
             lenient().when(server.getPlayerDataSerializer()).thenCallRealMethod();
             lenient().when(server.getConsoleSender()).thenReturn(new ConsoleCommandSender());
             lenient().when(server.getNetwork()).thenReturn(network);
@@ -350,6 +354,7 @@ public class ServerMocker extends Mocker<Server> {
         setField(server, Server.class.getDeclaredField("allowNether"), true);
 
         setField(server, Server.class.getDeclaredField("scoreboardManager"), new ScoreboardManager(new JSONScoreboardStorage(command_data.getAbsolutePath())));
+        setField(server, Server.class.getDeclaredField("functionManager"), new FunctionManager(command_data.getAbsolutePath()));
         setField(server, Server.class.getDeclaredField("commandMap"), new SimpleCommandMap(server));
         setField(server, Server.class.getDeclaredField("craftingManager"), new CraftingManager());
         setField(server, Server.class.getDeclaredField("resourcePackManager"), new ResourcePackManager(resourcePacksDir));

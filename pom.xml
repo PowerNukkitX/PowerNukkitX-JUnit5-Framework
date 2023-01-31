@@ -69,19 +69,6 @@
         </developer>
     </developers>
 
-    <distributionManagement>
-        <repository>
-            <id>powernukkitx-releases</id>
-            <name>powernukkitx-releases</name>
-            <url>https://maven.powernukkitx.cn/repository/maven-releases/</url>
-        </repository>
-        <snapshotRepository>
-            <id>powernukkitx-snapshots</id>
-            <name>powernukkitx-snapshots</name>
-            <url>https://maven.powernukkitx.cn/repository/maven-snapshots/</url>
-        </snapshotRepository>
-    </distributionManagement>
-
     <properties>
         <skipTests>false</skipTests>
         <skipGpg>true</skipGpg>
@@ -249,6 +236,7 @@
                     <doclint>none</doclint>
                     <quiet>true</quiet>
                     <sourcepath>${project.build.directory}/delombok</sourcepath>
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
                 </configuration>
                 <executions>
                     <execution>

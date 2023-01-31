@@ -84,6 +84,13 @@
         <junit.platform.version>1.1.0</junit.platform.version>
         <mokito.version>3.3.3</mokito.version>
     </properties>
+
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
     
     <dependencies>
         <dependency>
@@ -95,6 +102,10 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.powernukkit.bedrock.network</groupId>
+                    <artifactId>raknet</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>

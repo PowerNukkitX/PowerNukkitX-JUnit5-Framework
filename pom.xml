@@ -107,6 +107,14 @@
                     <groupId>org.powernukkit.bedrock.network</groupId>
                     <artifactId>raknet</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>com.dfsek.terra</groupId>
+                    <artifactId>Terra</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>cn.powernukkitx</groupId>
+                    <artifactId>libdeflate-java</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
         <dependency>

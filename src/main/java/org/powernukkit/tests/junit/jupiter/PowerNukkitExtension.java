@@ -34,6 +34,7 @@ import cn.nukkit.level.generator.Flat;
 import cn.nukkit.level.generator.Generator;
 import cn.nukkit.level.generator.Nether;
 import cn.nukkit.level.generator.Normal;
+import cn.nukkit.network.process.DataPacketManager;
 import cn.nukkit.potion.Effect;
 import cn.nukkit.potion.Potion;
 import org.apiguardian.api.API;
@@ -237,7 +238,7 @@ public class PowerNukkitExtension extends MockitoExtension implements TestInstan
             method.setAccessible(true);
             method.invoke(server);
         });
-
+        DataPacketManager.registerDefaultProcessors();
         Block.init();
         Enchantment.init();
         Potion.init();

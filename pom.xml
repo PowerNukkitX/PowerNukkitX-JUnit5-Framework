@@ -74,7 +74,7 @@
         <skipGpg>true</skipGpg>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <powernukkitx.version>00aa7284ee</powernukkitx.version>
+        <powernukkitx.version>080a31595f</powernukkitx.version>
         <lombok.version>1.18.24</lombok.version>
 
         <maven.compiler.source>17</maven.compiler.source>
@@ -94,7 +94,7 @@
     
     <dependencies>
         <dependency>
-            <groupId>dev.minjae</groupId>
+            <groupId>cn.powernukkitx</groupId>
             <artifactId>powernukkitx</artifactId>
             <version>${powernukkitx.version}</version>
             <scope>provided</scope>

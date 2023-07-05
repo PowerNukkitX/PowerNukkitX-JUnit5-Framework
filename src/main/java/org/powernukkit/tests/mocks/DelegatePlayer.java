@@ -4,8 +4,6 @@ import cn.nukkit.Player;
 import cn.nukkit.event.server.DataPacketSendEvent;
 import cn.nukkit.network.SourceInterface;
 import cn.nukkit.network.protocol.DataPacket;
-import co.aikar.timings.Timing;
-import co.aikar.timings.Timings;
 
 import java.net.InetSocketAddress;
 
@@ -24,13 +22,10 @@ public class DelegatePlayer extends Player {
         if (!this.connected) {
             return false;
         }
-
-        try (Timing ignored = Timings.getSendDataPacketTiming(packet)) {
-            DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
-            this.server.getPluginManager().callEvent(ev);
-            if (ev.isCancelled()) {
-                return false;
-            }
+        DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
+        this.server.getPluginManager().callEvent(ev);
+        if (ev.isCancelled()) {
+            return false;
         }
         return true;
     }
@@ -41,12 +36,10 @@ public class DelegatePlayer extends Player {
             return false;
         }
 
-        try (Timing ignored = Timings.getSendDataPacketTiming(packet)) {
-            DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
-            this.server.getPluginManager().callEvent(ev);
-            if (ev.isCancelled()) {
-                return false;
-            }
+        DataPacketSendEvent ev = new DataPacketSendEvent(this, packet);
+        this.server.getPluginManager().callEvent(ev);
+        if (ev.isCancelled()) {
+            return false;
         }
 
         return true;

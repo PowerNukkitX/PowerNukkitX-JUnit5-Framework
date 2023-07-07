@@ -74,7 +74,7 @@
         <skipGpg>true</skipGpg>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <powernukkitx.version>080a31595f</powernukkitx.version>
+        <powernukkitx.version>1.20.0-r2</powernukkitx.version>
         <lombok.version>1.18.24</lombok.version>
 
         <maven.compiler.source>17</maven.compiler.source>
